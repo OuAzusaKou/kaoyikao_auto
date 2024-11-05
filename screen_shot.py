@@ -1,3 +1,4 @@
+import json
 import pyautogui
 import tkinter as tk
 from pynput import keyboard
@@ -5,11 +6,14 @@ import os
 from screen_click import simulate_click
 from baidu_ocr import perform_ocr
 from score_predict import predict_score
+from zhipuai import ZhipuAI
 
-pos_list = [(2019,3721),(2109,3721),(2177,3721),(2261,3721)]
+from zhipu_ocr import zhipu_ocr_perform
+
+pos_list = [(2019,3721),(2109,3721),(2177,3721),(2261,3721),(2337,3721),(2413,3721),(2489,3721)]
 
 class ScreenshotTool:
-    def __init__(self):
+    def __init__(self,client):
         self.root = tk.Tk()
         self.root.attributes('-alpha', 0.3)
         self.root.attributes('-fullscreen', True)
@@ -33,6 +37,7 @@ class ScreenshotTool:
         
         # 添加新的属性来存储上次的截图区域
         self.last_region = None
+        self.client = client
         
     def on_key_press(self, key):
         if key == keyboard.Key.f2:
@@ -50,12 +55,21 @@ class ScreenshotTool:
         screenshot.save("screenshot.png")
         print("使用上次区域截图已保存为 screenshot.png")
         
-        # 调用OCR功能
         perform_ocr("screenshot.png")
-        
+        # 调用zhipu_ocr
+        zhipu_ocr_result = zhipu_ocr_perform("screenshot.png",self.client)
+        # 将结果追加至orc_results.json
+        with open('ocr_results.json', 'r',encoding='utf-8') as f:
+            data = json.load(f)
+        data['zhipu_results']=zhipu_ocr_result
+        with open('ocr_results.json', 'w',encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
         # 调用评分功能
-        score = predict_score()
+        score = predict_score(self.client)
         
+        x,y = pos_list[int(score)]
+
+        simulate_click(x, y)
         # 显示分数
         self.show_score(score)
     
@@ -111,10 +125,17 @@ class ScreenshotTool:
         
         # 调用OCR功能
         perform_ocr("screenshot.png")
-        
+        # 调用zhipu_ocr
+        zhipu_ocr_result = zhipu_ocr_perform("screenshot.png",self.client)
+        # 将结果追加至orc_results.json
+        with open('ocr_results.json', 'r',encoding='utf-8') as f:
+            data = json.load(f)
+        data['zhipu_results']=zhipu_ocr_result
+        with open('ocr_results.json', 'w',encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
         # 调用评分功能
-        score = predict_score()
-        
+        score = predict_score(self.client)
+        print('score',score)
         x,y = pos_list[int(score)]
         simulate_click(x, y)
         # 显示分数
@@ -145,5 +166,6 @@ class ScreenshotTool:
         self.root.mainloop()
 
 if __name__ == "__main__":
-    tool = ScreenshotTool()
+    client = ZhipuAI(api_key="c1a70a187972b988ece0deb79be8ca0f.E5Bd5ODqZb7ozak0")
+    tool = ScreenshotTool(client)
     tool.run()

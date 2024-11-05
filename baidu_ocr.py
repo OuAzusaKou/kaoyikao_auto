@@ -29,7 +29,7 @@ def perform_ocr(image_path):
         
         # 将文字结果保存到JSON文件
         output = {
-            "text_results": text_results,
+            "baidu_results": text_results,
             "total_words": len(text_results)
         }
         

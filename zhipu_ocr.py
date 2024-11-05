@@ -1,11 +1,7 @@
 from zhipuai import ZhipuAI
 import base64
-client = ZhipuAI(api_key="c1a70a187972b988ece0deb79be8ca0f.E5Bd5ODqZb7ozak0") # 填写您自己的APIKey
 
-
-
-
-def zhipu_ocr_perform(img_path):
+def zhipu_ocr_perform(img_path,client):
     with open(img_path, 'rb') as img_file:
         img_base = base64.b64encode(img_file.read()).decode('utf-8')
 
@@ -17,7 +13,7 @@ def zhipu_ocr_perform(img_path):
             "content": [
             {
                 "type": "text",
-                "text": "请解析图中的文字"
+                "text": "请对图中文字进行OCR识别，不需要其他解释文字。"
             },
             {
                 "type": "image_url",
@@ -39,4 +35,7 @@ def zhipu_ocr_perform(img_path):
 
 if __name__ == "__main__":
     img_path = "screenshot copy.png"
-    print(zhipu_ocr_perform(img_path))
+
+    client = ZhipuAI(api_key="c1a70a187972b988ece0deb79be8ca0f.E5Bd5ODqZb7ozak0") # 填写您自己的APIKey
+
+    print(zhipu_ocr_perform(img_path,client))
