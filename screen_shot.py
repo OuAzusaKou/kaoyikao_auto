@@ -10,8 +10,17 @@ from zhipuai import ZhipuAI
 
 from zhipu_ocr import zhipu_ocr_perform
 
-pos_list = [(2019,3721),(2109,3721),(2177,3721),(2261,3721),(2337,3721),(2413,3721),(2489,3721)]
-
+pos_list = [
+(1515,307),
+(1573,315),
+(1647,325),
+(1711,320),
+(1763,317),
+(1830,321),
+(1520,378),
+(1571,382),
+(1643,389)
+]
 class ScreenshotTool:
     def __init__(self,client):
         self.root = tk.Tk()
@@ -39,15 +48,33 @@ class ScreenshotTool:
         self.last_region = None
         self.client = client
         
+        # 添加自动截图控制变量
+        self.auto_screenshot = False
+        self.auto_screenshot_delay = 2000  # 2秒延迟
+        
     def on_key_press(self, key):
         if key == keyboard.Key.f2:
-            if self.last_region:
-                self.take_screenshot_with_last_region()
-            else:
+            if not self.last_region:
                 self.show_selection_window()
+            else:
+                if not self.auto_screenshot:
+                    # 开始自动截图
+                    self.auto_screenshot = True
+                    self.schedule_auto_screenshot()
+                else:
+                    # 停止自动截图
+                    self.auto_screenshot = False
+                    print("自动截图已停止")
         elif key == keyboard.Key.f3:
+            self.auto_screenshot = False  # 确保重置区域时也停止自动截图
             self.last_region = None
             print("截图区域已重置，下次将重新选择区域")
+    
+    def schedule_auto_screenshot(self):
+        if self.auto_screenshot and self.last_region:
+            self.take_screenshot_with_last_region()
+            # 安排下一次截图
+            self.root.after(self.auto_screenshot_delay, self.schedule_auto_screenshot)
     
     def take_screenshot_with_last_region(self):
         x1, y1, x2, y2 = self.last_region
@@ -71,7 +98,7 @@ class ScreenshotTool:
 
         simulate_click(x, y)
         # 显示分数
-        self.show_score(score)
+        # self.show_score(score)
     
     def show_selection_window(self):
         self.root.deiconify()
@@ -139,7 +166,7 @@ class ScreenshotTool:
         x,y = pos_list[int(score)]
         simulate_click(x, y)
         # 显示分数
-        self.show_score(score)
+        # self.show_score(score)
 
 
         
